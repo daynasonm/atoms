@@ -7,10 +7,10 @@ const nightBtn = document.getElementById("nightBtn");
 const TZ = "America/New_York";
 
 const atomDefs = [
-  { id: "red",       src: "assets/red.png",       href: "https://example.com/red",       size: 55  },
+  { id: "red",       src: "assets/red.png",       href: "https://www.formula1.com/en/drivers/lando-norris",       size: 75  },
   { id: "heytea",    src: "assets/heytea.png",    href: "https://www.instagram.com/p/DNwqxGV5ML4/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==",    size: 95  },
-  { id: "fivestars", src: "assets/fivestars.png", href: "https://example.com/fivestars", size: 120 },
-  { id: "green",     src: "assets/green.png",     href: "https://daynason.com/",     size: 130 },
+  { id: "fivestars", src: "assets/fivestars.png", href: "https://www.google.com/maps?sca_esv=89aaa52b873f06b6&output=search&q=saomai&source=lnms&fbs=ADc_l-aN0CWEZBOHjofHoaMMDiKpaEWjvZ2Py1XXV8d8KvlI3p-ML-906rRL_m6h4jR-tdAeyw6pOVABma0FfM0NmtARU-sbOiA6RT8n2OeXe8EcatveeTwc5I2JWuisscNVKSlzeeUbpvOTjpJHMcxSS6lMLXvQRB8AAHyH3RBVUb4WiYw-RTierb5UbovkiTrL2LX5xPXtmfOL44d7RtB4fdsqxmqwiw&entry=mc&ved=1t:200715&ictx=111", size: 120 },
+  { id: "green",     src: "assets/green.png",     href: "https://daynason.com/",     size: 140 },
   { id: "purple",    src: "assets/purple.png",    href: "https://example.com/purple",    size: 100 },
   { id: "blue",      src: "assets/blue.png",      href: "https://disney.fandom.com/wiki/Stitch",      size: 90  },
   { id: "pink",      src: "assets/pink.png",      href: "https://open.spotify.com/user/31vcphj4lct3i77xigq6u4qudp5m?si=4f634b17f8f64626",      size: 150 },
@@ -188,36 +188,7 @@ const REPEL_RADIUS = 160;      // how close before atoms "split"
 const REPEL_STRENGTH = 900;    // higher = stronger push
 const JITTER = 18;             // dismantle vibe (tiny shake) when close
 
-a.x += a.vx * dt;
-a.y += a.vy * dt;
 
-// cursor repel (split apart + avoid cursor)
-if (mouseX !== null && mouseY !== null) {
-  // atom center
-  const cx = a.x + a.size / 2;
-  const cy = a.y + a.size / 2;
 
-  const dx = cx - mouseX;
-  const dy = cy - mouseY;
-  const dist = Math.hypot(dx, dy);
-
-  if (dist < REPEL_RADIUS && dist > 0.001) {
-    // normalize direction away from cursor
-    const nx = dx / dist;
-    const ny = dy / dist;
-
-    // strength ramps up closer to cursor
-    const k = (1 - dist / REPEL_RADIUS);
-    const force = REPEL_STRENGTH * k * k; // smooth curve
-
-    // push velocity away
-    a.vx += nx * force * dt;
-    a.vy += ny * force * dt;
-
-    // tiny random jitter to feel like "dismantling"
-    a.vx += (Math.random() - 0.5) * JITTER * dt;
-    a.vy += (Math.random() - 0.5) * JITTER * dt;
-  }
-}
 
 
