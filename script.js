@@ -8,7 +8,7 @@ const TZ = "America/New_York";
 
 const atomDefs = [
   { id: "red",       src: "assets/red.png",       href: "https://example.com/red",       size: 55  },
-  { id: "heytea",    src: "assets/heytea.png",    href: "https://example.com/heytea",    size: 95  },
+  { id: "heytea",    src: "assets/heytea.png",    href: "https://www.instagram.com/p/DNwqxGV5ML4/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==",    size: 95  },
   { id: "fivestars", src: "assets/fivestars.png", href: "https://example.com/fivestars", size: 120 },
   { id: "green",     src: "assets/green.png",     href: "https://example.com/green",     size: 130 },
   { id: "purple",    src: "assets/purple.png",    href: "https://example.com/purple",    size: 100 },
