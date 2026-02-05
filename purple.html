@@ -16,9 +16,13 @@
       height:100vh;
       overflow:hidden;
       font-family:"Lyon", Georgia, "Times New Roman", serif;
-      background:#fff;
-      color:#111;
+      background: var(--bg);
+      color: var(--text);
+      transition: background-color .25s ease, color .25s ease;
     }
+
+    body.light{ --bg:#fff; --text:#111; --muted:#8a8a8a; }
+    body.dark { --bg:#000; --text:#f2f2f2; --muted:#8a8a8a; }
 
     /* UI layer */
     #ui{
@@ -35,6 +39,7 @@
       line-height:1;
       opacity:.95;
       user-select:none;
+      color: var(--text);
     }
     .sideText.left{
       left:24px;
@@ -45,16 +50,24 @@
       transform:translateY(-50%) rotate(90deg);
     }
 
-    .modeLabel{
+    /* REAL clickable mode buttons */
+    .modeBtn{
       position:fixed;
       left:50%;
       transform:translateX(-50%);
+      font:inherit;
       font-size:30px;
-      opacity:.6;
+      background:none;
+      border:none;
+      color: var(--text);
+      cursor:pointer;
       user-select:none;
+      pointer-events:auto; /* important: clickable even though #ui is pointer-events:none */
+      padding:10px 14px;
     }
-    .modeLabel.top{ top:18px; }
-    .modeLabel.bottom{ bottom:18px; opacity:1; }
+    .modeBtn.top{ top:18px; }
+    .modeBtn.bottom{ bottom:18px; }
+    .modeBtn.active{ color: var(--muted); }
 
     /* center purple orb */
     .orb{
@@ -65,88 +78,7 @@
       height:min(520px, 72vmin);
       transform:translate(-50%, -50%);
       border-radius:50%;
-
-      /* soft glow gradient like your screenshot */
       background: radial-gradient(circle at 50% 50%,
         rgba(160, 0, 255, 0.95) 0%,
         rgba(180, 60, 255, 0.65) 35%,
-        rgba(210, 150, 255, 0.35) 60%,
-        rgba(255, 255, 255, 0) 75%
-      );
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .orbText{
-      color:#fff;
-      font-size:34px;
-      letter-spacing:.2px;
-    }
-  </style>
-</head>
-
-<body>
-  <div id="ui">
-    <div id="dateText" class="sideText left"></div>
-    <div class="modeLabel top">Day</div>
-    <div class="modeLabel bottom">Night</div>
-    <div id="timeText" class="sideText right"></div>
-  </div>
-
-  <div class="orb">
-    <div class="orbText">hello world!</div>
-  </div>
-
-  <script>
-    const TZ = "America/New_York";
-    const dateText = document.getElementById("dateText");
-    const timeText = document.getElementById("timeText");
-
-    function formatDate(d) {
-      const parts = new Intl.DateTimeFormat("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        timeZone: TZ,
-      }).formatToParts(d);
-
-      const w = parts.find(p => p.type === "weekday")?.value ?? "";
-      const m = parts.find(p => p.type === "month")?.value ?? "";
-      const day = parts.find(p => p.type === "day")?.value ?? "";
-      const y = parts.find(p => p.type === "year")?.value ?? "";
-      return `${w} ${m} ${day} ${y}`.trim();
-    }
-
-    function formatTime(d) {
-      const parts = new Intl.DateTimeFormat("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true,
-        timeZone: TZ,
-        timeZoneName: "short",
-      }).formatToParts(d);
-
-      const h = parts.find(p => p.type === "hour")?.value ?? "";
-      const min = parts.find(p => p.type === "minute")?.value ?? "";
-      const sec = parts.find(p => p.type === "second")?.value ?? "";
-      const dp = parts.find(p => p.type === "dayPeriod")?.value ?? "";
-      let tz = parts.find(p => p.type === "timeZoneName")?.value ?? "ET";
-      if (!/E[DS]T/.test(tz)) tz = "ET";
-
-      return `${h}:${min}:${sec} ${dp} ${tz}`.trim();
-    }
-
-    function updateClock() {
-      const now = new Date();
-      dateText.textContent = formatDate(now);
-      timeText.textContent = formatTime(now);
-    }
-
-    updateClock();
-    setInterval(updateClock, 1000);
-  </script>
-</body>
-</html>
+        rgba(210, 150, 255, 0.
