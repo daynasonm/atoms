@@ -4,81 +4,199 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Purple</title>
+
   <style>
+    /* Lyon Regular (best effort). If you have the actual font file, replace this with a real src:url(...) */
     @font-face{
-      font-family:"Lyon";
+      font-family: "Lyon";
       src: local("Lyon Text Regular"), local("Lyon Regular"), local("Lyon");
-      font-weight:400; font-style:normal;
+      font-weight: 400;
+      font-style: normal;
     }
 
     body{
-      margin:0;
-      height:100vh;
-      overflow:hidden;
-      font-family:"Lyon", Georgia, "Times New Roman", serif;
-      background: var(--bg);
-      color: var(--text);
-      transition: background-color .25s ease, color .25s ease;
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      font-family: "Lyon", Georgia, "Times New Roman", serif;
+      background: #ffffff;
+      color: #111111;
     }
 
-    body.light{ --bg:#fff; --text:#111; --muted:#8a8a8a; }
-    body.dark { --bg:#000; --text:#f2f2f2; --muted:#8a8a8a; }
-
-    /* UI layer */
+    /* UI layer (EXACT same as original) */
     #ui{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none; /* UI text doesn't block; buttons re-enable below */
     }
 
+    /* side texts (EXACT same as original) */
     .sideText{
-      position:fixed;
-      top:50%;
-      transform-origin:center;
-      font-size:28px;
-      line-height:1;
-      opacity:.95;
-      user-select:none;
-      color: var(--text);
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform-origin: center;
+      letter-spacing: .2px;
+      font-size: 28px;
+      line-height: 1;
+      opacity: .95;
+      user-select: none;
+      pointer-events: none;
     }
+
     .sideText.left{
-      left:24px;
-      transform:translateY(-50%) rotate(-90deg);
+      left: 24px;
+      transform: translateY(-50%) rotate(-90deg);
     }
+
     .sideText.right{
-      right:24px;
-      transform:translateY(-50%) rotate(90deg);
+      right: 24px;
+      left: auto;
+      transform: translateY(-50%) rotate(90deg);
     }
 
-    /* REAL clickable mode buttons */
+    /* mode buttons (EXACT same as original) */
     .modeBtn{
-      position:fixed;
-      left:50%;
-      transform:translateX(-50%);
-      font:inherit;
-      font-size:30px;
-      background:none;
-      border:none;
-      color: var(--text);
-      cursor:pointer;
-      user-select:none;
-      pointer-events:auto; /* important: clickable even though #ui is pointer-events:none */
-      padding:10px 14px;
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      background: none;
+      border: none;
+      padding: 10px 14px;
+      font: inherit;
+      font-size: 30px;
+      color: #111111;
+      cursor: pointer;
+      pointer-events: auto; /* clickable */
+      user-select: none;
     }
-    .modeBtn.top{ top:18px; }
-    .modeBtn.bottom{ bottom:18px; }
-    .modeBtn.active{ color: var(--muted); }
 
-    /* center purple orb */
+    .modeBtn.top{ top: 18px; }
+    .modeBtn.bottom{ bottom: 18px; }
+
+    /* Make Day look “inactive/grey” like your screenshot reference */
+    .modeBtn.active{
+      color: #8a8a8a;
+    }
+
+    /* ---------- purple orb ---------- */
     .orb{
-      position:fixed;
-      left:50%;
-      top:50%;
-      width:min(520px, 72vmin);
-      height:min(520px, 72vmin);
-      transform:translate(-50%, -50%);
-      border-radius:50%;
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      width: min(620px, 78vmin);
+      height: min(620px, 78vmin);
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+
       background: radial-gradient(circle at 50% 50%,
         rgba(160, 0, 255, 0.95) 0%,
         rgba(180, 60, 255, 0.65) 35%,
-        rgba(210, 150, 255, 0.
+        rgba(210, 150, 255, 0.35) 60%,
+        rgba(255, 255, 255, 0) 75%
+      );
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .orbText{
+      color: #fff;
+      font-size: 34px;
+      letter-spacing: .2px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- UI (EXACT same structure/classes as original) -->
+  <div id="ui">
+    <div id="dateText" class="sideText left"></div>
+
+    <!-- If you want them to be clickable later, keep as buttons -->
+    <button id="dayBtn" class="modeBtn top active" type="button">Day</button>
+    <button id="nightBtn" class="modeBtn bottom" type="button">Night</button>
+
+    <div id="timeText" class="sideText right"></div>
+  </div>
+
+  <div class="orb">
+    <div class="orbText">hello world!</div>
+  </div>
+
+  <script>
+    const TZ = "America/New_York";
+    const dateText = document.getElementById("dateText");
+    const timeText = document.getElementById("timeText");
+
+    function formatDate(d) {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        timeZone: TZ,
+      }).formatToParts(d);
+
+      const w = parts.find(p => p.type === "weekday")?.value ?? "";
+      const m = parts.find(p => p.type === "month")?.value ?? "";
+      const day = parts.find(p => p.type === "day")?.value ?? "";
+      const y = parts.find(p => p.type === "year")?.value ?? "";
+      return `${w} ${m} ${day} ${y}`.trim();
+    }
+
+    function formatTime(d) {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+        timeZone: TZ,
+        timeZoneName: "short",
+      }).formatToParts(d);
+
+      const h = parts.find(p => p.type === "hour")?.value ?? "";
+      const min = parts.find(p => p.type === "minute")?.value ?? "";
+      const sec = parts.find(p => p.type === "second")?.value ?? "";
+      const dp = parts.find(p => p.type === "dayPeriod")?.value ?? "";
+      let tz = parts.find(p => p.type === "timeZoneName")?.value ?? "ET";
+      if (!/E[DS]T/.test(tz)) tz = "ET";
+
+      return `${h}:${min}:${sec} ${dp} ${tz}`.trim();
+    }
+
+    function updateClock() {
+      const now = new Date();
+      dateText.textContent = formatDate(now);
+      timeText.textContent = formatTime(now);
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // (Optional) if you want Day/Night to visually toggle on this page:
+    const dayBtn = document.getElementById("dayBtn");
+    const nightBtn = document.getElementById("nightBtn");
+
+    dayBtn.addEventListener("click", () => {
+      dayBtn.classList.add("active");
+      nightBtn.classList.remove("active");
+      document.body.style.background = "#ffffff";
+      document.body.style.color = "#111111";
+      dayBtn.style.color = "#8a8a8a";
+      nightBtn.style.color = "#111111";
+    });
+
+    nightBtn.addEventListener("click", () => {
+      nightBtn.classList.add("active");
+      dayBtn.classList.remove("active");
+      document.body.style.background = "#000000";
+      document.body.style.color = "#f2f2f2";
+      nightBtn.style.color = "#8a8a8a";
+      dayBtn.style.color = "#f2f2f2";
+    });
+  </script>
+</body>
+</html>
