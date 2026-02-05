@@ -1,0 +1,123 @@
+/* Lyon Regular (best effort). If you have the actual font file, replace this with a real src:url(...) */
+@font-face{
+  font-family: "Lyon";
+  src: local("Lyon Text Regular"), local("Lyon Regular"), local("Lyon");
+  font-weight: 400;
+  font-style: normal;
+}
+
+:root{
+  /* safe zones so atoms never cover the 4 texts */
+  --padTop: 90px;
+  --padBottom: 90px;
+  --padLeft: 150px;
+  --padRight: 150px;
+}
+
+body{
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  font-family: "Lyon", Georgia, "Times New Roman", serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background-color .25s ease, color .25s ease;
+}
+
+/* modes */
+body.light{
+  --bg: #ffffff;
+  --text: #111111;
+  --muted: #8a8a8a;
+  --glow: rgba(0,0,0,.18);
+}
+
+body.dark{
+  --bg: #000000;
+  --text: #f2f2f2;
+  --muted: #8a8a8a;
+  --glow: rgba(255,255,255,.18);
+}
+
+/* layers */
+#scene{
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+#ui{
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none; /* UI text doesn't block atoms; buttons re-enable below */
+}
+
+/* side texts */
+.sideText{
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform-origin: center;
+  letter-spacing: .2px;
+  font-size: 28px;
+  line-height: 1;
+  opacity: .95;
+  user-select: none;
+  pointer-events: none;
+}
+
+.sideText.left{
+  left: 24px;
+  transform: translateY(-50%) rotate(-90deg);
+}
+
+.sideText.right{
+  right: 24px;
+  left: auto;
+  transform: translateY(-50%) rotate(90deg);
+}
+
+/* mode buttons */
+.modeBtn{
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  background: none;
+  border: none;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 30px;
+  color: var(--text);
+  cursor: pointer;
+  pointer-events: auto; /* clickable */
+  user-select: none;
+}
+
+.modeBtn.top{ top: 18px; }
+.modeBtn.bottom{ bottom: 18px; }
+
+.modeBtn.active{
+  color: var(--muted);
+}
+
+/* atoms */
+.atom{
+  position: absolute;
+  display: block;
+  width: var(--size);
+  height: var(--size);
+  transform: translate3d(0,0,0);
+  will-change: transform;
+}
+
+.atom img{
+  width: 100%;
+  height: 100%;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+
+  /* simple glow */
+  filter: drop-shadow(0 0 22px var(--glow));
+}
