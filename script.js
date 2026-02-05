@@ -11,9 +11,9 @@ const atomDefs = [
   { id: "heytea",    src: "assets/heytea.png",    href: "https://www.instagram.com/p/DNwqxGV5ML4/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==",    size: 95  },
   { id: "fivestars", src: "assets/fivestars.png", href: "https://www.google.com/maps?sca_esv=89aaa52b873f06b6&output=search&q=saomai&source=lnms&fbs=ADc_l-aN0CWEZBOHjofHoaMMDiKpaEWjvZ2Py1XXV8d8KvlI3p-ML-906rRL_m6h4jR-tdAeyw6pOVABma0FfM0NmtARU-sbOiA6RT8n2OeXe8EcatveeTwc5I2JWuisscNVKSlzeeUbpvOTjpJHMcxSS6lMLXvQRB8AAHyH3RBVUb4WiYw-RTierb5UbovkiTrL2LX5xPXtmfOL44d7RtB4fdsqxmqwiw&entry=mc&ved=1t:200715&ictx=111", size: 120 },
   { id: "green",     src: "assets/green.png",     href: "https://daynason.com/",     size: 140 },
-  { id: "purple",    src: "assets/purple.png",    href: "https://example.com/purple",    size: 100 },
+  { id: "purple",    src: "assets/purple.png",    href: "purple.html",    size: 150 },
   { id: "blue",      src: "assets/blue.png",      href: "https://disney.fandom.com/wiki/Stitch",      size: 90  },
-  { id: "pink",      src: "assets/pink.png",      href: "https://open.spotify.com/user/31vcphj4lct3i77xigq6u4qudp5m?si=4f634b17f8f64626",      size: 150 },
+  { id: "pink",      src: "assets/pink.png",      href: "https://open.spotify.com/user/31vcphj4lct3i77xigq6u4qudp5m?si=4f634b17f8f64626",      size: 100 },
 ];
 
 // --- helpers ---
@@ -73,9 +73,7 @@ function formatTime(d) {
   const dp = parts.find(p => p.type === "dayPeriod")?.value ?? "";
   let tz = parts.find(p => p.type === "timeZoneName")?.value ?? "ET";
 
-  // Some browsers might return GMT-5; keep ET if not EST/EDT
   if (!/E[DS]T/.test(tz)) tz = "ET";
-
   return `${h}:${min}:${sec} ${dp} ${tz}`.trim();
 }
 
@@ -98,6 +96,24 @@ function setMode(mode) {
 dayBtn.addEventListener("click", () => setMode("light"));
 nightBtn.addEventListener("click", () => setMode("dark"));
 
+// --- cursor avoiding setup (MUST be above tick so it's defined) ---
+let mouseX = null;
+let mouseY = null;
+
+window.addEventListener("mousemove", (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+window.addEventListener("mouseleave", () => {
+  mouseX = null;
+  mouseY = null;
+});
+
+const REPEL_RADIUS = 160;
+const REPEL_STRENGTH = 900;
+const JITTER = 18;
+
 // --- atoms creation + animation ---
 computeBounds();
 
@@ -117,15 +133,11 @@ const atoms = atomDefs.map(def => {
 
   scene.appendChild(a);
 
-  // initial positions inside safe bounds
   const x = rand(bounds.minX, bounds.maxX - def.size);
   const y = rand(bounds.minY, bounds.maxY - def.size);
-
-  // gentle velocities (px/sec)
   const vx = rand(-18, 18);
   const vy = rand(-18, 18);
 
-  // slight organic drift
   return { el: a, size: def.size, x, y, vx, vy };
 });
 
@@ -141,7 +153,7 @@ function keepInBounds(atom) {
 
 let last = performance.now();
 function tick(t) {
-  const dt = Math.min(0.033, (t - last) / 1000); // cap dt for stability
+  const dt = Math.min(0.033, (t - last) / 1000);
   last = t;
 
   for (const a of atoms) {
@@ -149,10 +161,35 @@ function tick(t) {
     a.vx += (Math.random() - 0.5) * 6 * dt;
     a.vy += (Math.random() - 0.5) * 6 * dt;
 
+    // cursor repel (split apart + avoid cursor)
+    if (mouseX !== null && mouseY !== null) {
+      const cx = a.x + a.size / 2;
+      const cy = a.y + a.size / 2;
+
+      const dx = cx - mouseX;
+      const dy = cy - mouseY;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist < REPEL_RADIUS && dist > 0.001) {
+        const nx = dx / dist;
+        const ny = dy / dist;
+
+        const k = 1 - dist / REPEL_RADIUS;
+        const force = REPEL_STRENGTH * k * k;
+
+        a.vx += nx * force * dt;
+        a.vy += ny * force * dt;
+
+        a.vx += (Math.random() - 0.5) * JITTER * dt;
+        a.vy += (Math.random() - 0.5) * JITTER * dt;
+      }
+    }
+
     // clamp speed (gentle)
     a.vx = clamp(a.vx, -22, 22);
     a.vy = clamp(a.vy, -22, 22);
 
+    // move
     a.x += a.vx * dt;
     a.y += a.vy * dt;
 
@@ -168,27 +205,3 @@ window.addEventListener("resize", () => {
   computeBounds();
   for (const a of atoms) keepInBounds(a);
 });
-
-//cursor avoiding the atoms
-
-let mouseX = null;
-let mouseY = null;
-
-window.addEventListener("mousemove", (e) => {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
-});
-
-window.addEventListener("mouseleave", () => {
-  mouseX = null;
-  mouseY = null;
-});
-
-const REPEL_RADIUS = 160;      // how close before atoms "split"
-const REPEL_STRENGTH = 900;    // higher = stronger push
-const JITTER = 18;             // dismantle vibe (tiny shake) when close
-
-
-
-
-
